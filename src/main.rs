@@ -1,5 +1,3 @@
-use image::GenericImageView;
-use std::path::Path;
 use std::sync::mpsc;
 use tray_item::IconSource;
 use tray_item::TrayItem;
@@ -10,18 +8,8 @@ enum Message {
     Green,
 }
 
-fn load_icon_source(file_path: &str) -> IconSource {
-    let img = image::open(Path::new(&file_path)).unwrap();
-
-    IconSource::Data {
-        data: img.as_bytes().to_vec(),
-        height: img.dimensions().1 as i32,
-        width: img.dimensions().0 as i32,
-    }
-}
-
 fn main() {
-    let icon_source = load_icon_source("assets/crab.png");
+    let icon_source = IconSource::Resource("crab-icon");
 
     let mut tray = TrayItem::new("My Tray App", icon_source).unwrap();
 
@@ -55,12 +43,12 @@ fn main() {
             }
             Ok(Message::Green) => {
                 println!("Green!");
-                let icon_source: IconSource = load_icon_source("assets/tray_icon-green.png");
+                let icon_source: IconSource = IconSource::Resource("green-icon");
                 tray.set_icon(icon_source).unwrap();
             }
             Ok(Message::Red) => {
                 println!("Red!");
-                let icon_source: IconSource = load_icon_source("assets/tray_icon-red.png");
+                let icon_source: IconSource = IconSource::Resource("red-icon");
                 tray.set_icon(icon_source).unwrap();
             }
             _ => {}

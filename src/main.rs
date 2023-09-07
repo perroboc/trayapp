@@ -1,27 +1,22 @@
-use std::fs::File;
+use image::GenericImageView;
+use std::path::Path;
 use std::sync::mpsc;
-use std::io::BufReader;
-use png::Decoder;
-use tray_item::{TrayItem, IconSource};
+use tray_item::IconSource;
+use tray_item::TrayItem;
 
 enum Message {
     Quit,
     Red,
-    Green
+    Green,
 }
 
 fn load_icon_source(file_path: &str) -> IconSource {
-    let file = File::open(file_path).unwrap();
-    let reader = BufReader::new(file);
-    let decoder = Decoder::new(reader);
-    let mut reader = decoder.read_info().unwrap();
-    let mut buf = vec![0; reader.output_buffer_size()];
-    let info = reader.next_frame(&mut buf).unwrap();
-    
+    let img = image::open(Path::new(&file_path)).unwrap();
+
     IconSource::Data {
-        data: buf,
-        height: info.height as i32,
-        width: info.width as i32,
+        data: img.as_bytes().to_vec(),
+        height: img.dimensions().1 as i32,
+        width: img.dimensions().0 as i32,
     }
 }
 
@@ -56,18 +51,18 @@ fn main() {
         match rx.recv() {
             Ok(Message::Quit) => {
                 println!("Quit");
-                break
-            },
-            Ok(Message::Green) =>{
+                break;
+            }
+            Ok(Message::Green) => {
                 println!("Green!");
                 let icon_source: IconSource = load_icon_source("assets/tray_icon-green.png");
                 tray.set_icon(icon_source).unwrap();
-            },
-            Ok(Message::Red) =>{
+            }
+            Ok(Message::Red) => {
                 println!("Red!");
                 let icon_source: IconSource = load_icon_source("assets/tray_icon-red.png");
                 tray.set_icon(icon_source).unwrap();
-            },
+            }
             _ => {}
         }
     }
